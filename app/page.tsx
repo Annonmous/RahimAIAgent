@@ -42,6 +42,14 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [injectedSkills, setInjectedSkills] = useState<string[]>([]);
 
+  const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL?.replace(/\/+$/, "");
+  const getBackendApiUrl = (path: string) => {
+    if (!backendBaseUrl) {
+      throw new Error("NEXT_PUBLIC_BACKEND_BASE_URL is not configured");
+    }
+    return `${backendBaseUrl}${path}`;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -119,7 +127,7 @@ export default function Home() {
       if (!proposalInput.trim()) return;
       setProposalOutput("");
       try {
-        const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/generate", { job_description: proposalInput });
+        const res = await axios.post(getBackendApiUrl("/generate"), { job_description: proposalInput });
         setProposalOutput(res.data.proposal || JSON.stringify(res.data));
       } catch (err) { 
         setProposalOutput("Error: Ensure your local FastAPI backend is running."); 
@@ -129,7 +137,7 @@ export default function Home() {
       setCvTextPreview(""); 
       setBase64Pdf("");
       try {
-        const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/generate-cv", { personal_details: cvInput });
+        const res = await axios.post(getBackendApiUrl("/generate-cv"), { personal_details: cvInput });
         if (res.data.error) { setCvTextPreview(res.data.error); } 
         else { 
           setCvTextPreview(res.data.text_preview); 
@@ -148,14 +156,14 @@ export default function Home() {
           formData.append("file", selectedFile);
           formData.append("job_description", atsJobInput);
           
-          const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/match-upload", formData, {
+          const res = await axios.post(getBackendApiUrl("/match-upload"), formData, {
             headers: { "Content-Type": "multipart/form-data" }
           });
           if (res.data.error) alert(res.data.error);
           else setMatchData(res.data);
         } else {
           if (!atsCvInput.trim() || !atsJobInput.trim()) return;
-          const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/match-score", {
+          const res = await axios.post(getBackendApiUrl("/match-score"), {
             cv_text: atsCvInput, 
             job_description: atsJobInput
           });
