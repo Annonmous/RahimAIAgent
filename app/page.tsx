@@ -119,7 +119,7 @@ export default function Home() {
       if (!proposalInput.trim()) return;
       setProposalOutput("");
       try {
-        const res = await axios.post("http://localhost:8000/generate", { job_description: proposalInput });
+        const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/generate", { job_description: proposalInput });
         setProposalOutput(res.data.proposal || JSON.stringify(res.data));
       } catch (err) { 
         setProposalOutput("Error: Ensure your local FastAPI backend is running."); 
@@ -129,7 +129,7 @@ export default function Home() {
       setCvTextPreview(""); 
       setBase64Pdf("");
       try {
-        const res = await axios.post("http://localhost:8000/generate-cv", { personal_details: cvInput });
+        const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/generate-cv", { personal_details: cvInput });
         if (res.data.error) { setCvTextPreview(res.data.error); } 
         else { 
           setCvTextPreview(res.data.text_preview); 
@@ -148,14 +148,14 @@ export default function Home() {
           formData.append("file", selectedFile);
           formData.append("job_description", atsJobInput);
           
-          const res = await axios.post("http://localhost:8000/match-upload", formData, {
+          const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/match-upload", formData, {
             headers: { "Content-Type": "multipart/form-data" }
           });
           if (res.data.error) alert(res.data.error);
           else setMatchData(res.data);
         } else {
           if (!atsCvInput.trim() || !atsJobInput.trim()) return;
-          const res = await axios.post("http://localhost:8000/match-score", {
+          const res = await axios.post("https://rahim-ai-agent-backend.vercel.app/match-score", {
             cv_text: atsCvInput, 
             job_description: atsJobInput
           });
